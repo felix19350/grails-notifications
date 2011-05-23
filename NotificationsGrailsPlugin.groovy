@@ -6,7 +6,7 @@ class NotificationsGrailsPlugin {
   // the version or versions of Grails the plugin is designed for
   def grailsVersion = "1.3.7 > *"
   // the other plugins this plugin depends on
-  def dependsOn = [executor: "* > 0.2", mail: "* > 1.0", quartz: "* > 0.4.1"]
+  def dependsOn = [executor: "* > 0.2", quartz: "* > 0.4.1", mail: "* > 1.0"]
 
   // resources that are excluded from plugin packaging
   def pluginExcludes = [
