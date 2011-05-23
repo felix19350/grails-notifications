@@ -26,6 +26,10 @@
 *.sql
 *.sqlite
 
+# Project files #
+#################
+*.iml
+
 # OS generated files #
 ######################
 .DS_Store?
@@ -38,3 +42,5 @@ Thumbs.db
 target/
 web-app/META-INF/
 web-app/WEB-INF/
+.svn/
+.idea/

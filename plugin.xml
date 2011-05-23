@@ -23,9 +23,9 @@ These can be delivered through several channels such as e-mail (and in future ve
     <resource>pt.whiteroad.plugins.notifications.NotificationService</resource>
   </resources>
   <dependencies>
-    <plugin name='executor' version='* &gt; 0.2' />
-    <plugin name='quartz' version='* &gt; 0.4.1' />
-    <plugin name='mail' version='* &gt; 1.0' />
+    <plugin name='executor' version='0.2 &gt; *' />
+    <plugin name='quartz' version='0.4.1 &gt; *' />
+    <plugin name='mail' version='1.0 &gt; *' />
   </dependencies>
   <behavior />
 </plugin>
