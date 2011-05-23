@@ -33,6 +33,9 @@ class NotificationServiceTests extends GroovyTestCase {
   }
 
   protected void tearDown() {
+    //Sleep should be here since the sendNotification launches a new thread and the application may begin
+    //its shutdown process in the meantime
+    sleep 15000
     super.tearDown()
   }
 
@@ -45,10 +48,6 @@ class NotificationServiceTests extends GroovyTestCase {
     notification.save(flush: true)
     assertEquals oldCount+1 , Notification.count()
     notificationService.sendNotification(notification)
-
-    //Sleep should be here since the sendNotification launches a new thread and the application may begin
-    //its shutdown process in the meantime
-    sleep 10000
   }
 
   void testPubSubScheduled(){
@@ -63,10 +62,6 @@ class NotificationServiceTests extends GroovyTestCase {
     Notification notification = new Notification(message: "Scheduled PUB/SUB notification", topic: topic, scheduledDate: date).save(flush: true)
     assertEquals oldCount+1 , Notification.count()
     notificationService.sendNotification(notification)
-
-    //Sleep should be here since the sendNotification launches a new thread and the application may begin
-    //its shutdown process in the meantime
-    sleep 15000
   }
 
   /**
@@ -101,10 +96,6 @@ class NotificationServiceTests extends GroovyTestCase {
     }
     assertEquals oldCount+1 , Notification.count()
     notificationService.sendNotification(notification)
-
-    //Sleep should be here since the sendNotification launches a new thread and the application may begin
-    //its shutdown process in the meantime
-    sleep 10000
   }
 
   void testUnsubscribeTopic(){
