@@ -1,19 +1,21 @@
-package pt.whiteroad.plugins.notifications
+package test
 
-class Subscription {
+import pt.whiteroad.plugins.notifications.NotificationTopic
+import pt.whiteroad.plugins.notifications.Channel
 
-    static belongsTo = [subscriber: Subscriber]
+class TestSubscription {
+    static belongsTo = [subscriber: TestSubscriber]
 
     static hasMany = [channels: Channel]
 
     NotificationTopic topic
-  
+
     static constraints = {
       topic(nullable: false)
       channels(minSize: 1, validator: {val, obj ->
         def allBelongToSubscriber = true
         val.each{
-         allBelongToSubscriber = allBelongToSubscriber && (it in obj.subscriber.channels)  
+         allBelongToSubscriber = allBelongToSubscriber && (it in obj.subscriber.channels)
         }
         return allBelongToSubscriber
       })

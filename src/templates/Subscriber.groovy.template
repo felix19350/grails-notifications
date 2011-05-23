@@ -1,0 +1,56 @@
+package ${packageName}
+
+import pt.whiteroad.plugins.notifications.Channel
+
+class ${subscriberDomainClass} {
+
+    static hasMany = [subscriptions: ${subscriptionDomainClass}, channels: Channel]
+
+    String alias
+
+    static constraints = {
+      alias(nullable: false, unique: true)
+    }
+
+     /**
+   * Convenience method to create a subscriber. User defined classes may need to
+   * change this method.
+   * @param alias - The alias of the subscriber
+   * @param channels - A set of communication channels associated with the subscriber
+   * @return subscriber - The instance of the created subscriber, or null if there is an error.
+   * */
+  static ${subscriberDomainClass} create${subscriberDomainClass}(String alias, Collection<Channel> channels){
+    ${subscriberDomainClass}.withTransaction{status ->
+      try{
+        def toInsert = []
+
+        channels.each{
+          if(!it.id){
+            toInsert << it.save()
+          }else{
+            toInsert << it
+          }
+        }
+
+        def subscriber = new ${subscriberDomainClass}(alias: alias)
+        toInsert.each{
+          subscriber.addToChannels(it)
+        }
+
+        if(!subscriber.save()){
+          subscriber.errors.each{
+            System.err.println it
+          }
+          throw new RuntimeException()
+        }
+
+        return subscriber
+      }catch(Exception e){
+        e.printStackTrace()
+        status.setRollbackOnly()
+        return null
+      }
+    }
+  }
+    
+}

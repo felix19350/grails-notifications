@@ -1,5 +1,7 @@
 package pt.whiteroad.plugins.notifications
 
+import pt.whiteroad.plugins.notifications.config.NotificationUtils
+
 /**
  * The notification service is the main entry point to the provided functionality. All the relevant methods
  * are exposed here. Note that simple topic management operations can be handled directly by the NotificationTopic object and GORM
@@ -12,38 +14,7 @@ class NotificationService {
   static transactional = false
 
   def quartzScheduler
-
-
-  def createSubscriber(String alias, Collection<Channel> channels){
-    Subscriber.withTransaction{status ->
-      try{
-        def toInsert = []
-
-        channels.each{
-          if(!it.id){
-            toInsert << it.save()
-          }else{
-            toInsert << it
-          }
-        }
-
-        def subscriber = new Subscriber(alias: alias)
-        toInsert.each{
-          subscriber.addToChannels(it)
-        }
-
-        if(!subscriber.save()){
-          throw new RuntimeException()
-        }
-
-        return subscriber
-      }catch(Exception e){
-        e.printStackTrace()
-        status.setRollbackOnly()
-        return null
-      }
-    }
-  }
+  def grailsApplication
 
   /**
    * This is syntatic sugar. It creates a notification based on the arguments, and then calls
@@ -86,6 +57,8 @@ class NotificationService {
    * Immediately sends notifications to the subscribers, overlooking the scheduler.
    * */
   def sendNow(Notification notification){
+    def Subscription = loadSubscription()
+
     def subscriptions = Subscription.findAllByTopic(notification.topic)
     subscriptions.each{ subscription ->
       subscription.channels.each{ channel ->
@@ -106,11 +79,14 @@ class NotificationService {
    * Allows the subscription of a topic.
    * @return subscription - The susbcription that was created.
    * */
-  def subscribeTopic(Subscriber subscriber, String topic, Collection<Channel> channels){
+  def subscribeTopic(subscriber, topic, channels){
+    def Subscription = loadSubscription()
+
     Subscription.withTransaction{ status ->
       try{
         def notificationTopic = NotificationTopic.findByTopic(topic)
-        def subscription = new Subscription(topic: notificationTopic)
+        def subscription = Subscription.newInstance()
+        subscription.topic = notificationTopic
         channels.each{ channel ->
           subscription.addToChannels(channel)
         }
@@ -133,16 +109,24 @@ class NotificationService {
 
   /**
    * Syntatic sugar method. Unsubscribes a topic
+   * @param subscriber - String, The subscriber's alias
+   * @param topic - String, the Notification's topic
    * */
-  def unsubscribeTopic(Subscriber subscriber, String topic){
+  def unsubscribeTopic(String subscriber, String topic){
     def notificationTopic = NotificationTopic.findByTopic(topic)
-    unsubscribeTopic(subscriber, notificationTopic)
+    def Subscriber = loadSubscriber()
+    def theSubscriber = Subscriber.findByAlias(subscriber)
+    unsubscribeTopic(theSubscriber, notificationTopic)
   }
 
   /**
-   * Unsubscribes a topic
+   * Unsubscribes a topic.
+   * @param subscriber - A Subscriber
+   * @param topic - a NotificationTopic
    * */
-  def unsubscribeTopic(Subscriber subscriber, NotificationTopic topic){
+  def unsubscribeTopic(subscriber, NotificationTopic topic){
+    def Subscription = loadSubscription()
+
     Subscription.withTransaction{ status ->
       //Remove subscription
       try{
@@ -159,6 +143,16 @@ class NotificationService {
         status.setRollbackOnly()
       }
     }
+  }
+
+  private Class loadSubscriber(){
+    def className = NotificationUtils.config.subscriberDomainClass
+    return grailsApplication.getClassForName("${className}")
+  }
+
+  private Class loadSubscription(){
+    def className = NotificationUtils.config.subscriptionDomainClass
+    return grailsApplication.getClassForName("${className}")
   }
 
 }

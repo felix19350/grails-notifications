@@ -1,9 +1,11 @@
 package pt.whiteroad.plugins.notifications
 
+import test.TestSubscriber
+import test.TestSubscription
 
 class NotificationServiceTests extends GroovyTestCase {
 
-  def transactional = false
+  def transactional = true
   def notificationService
   def quartzScheduler
 
@@ -18,13 +20,13 @@ class NotificationServiceTests extends GroovyTestCase {
       new NotificationTopic(topic: defaultTopic).save(flush: true)
     }
 
-    if(!Subscriber.findByAlias(defaultSubscriber)){
+    if(!TestSubscriber.findByAlias(defaultSubscriber)){
       def channels = [
               new Channel(channelImpl: ChannelType.Email.implementingClass, destination: "nuno.lopes.luis@gmail.com"),
               new Channel(channelImpl: ChannelType.Email.implementingClass, destination: "felix19350@gmail.com"),
               new Channel(channelImpl: ChannelType.Internal.implementingClass, destination: "TEST USER")
       ]
-      def subscriber = notificationService.createSubscriber(defaultSubscriber, channels)
+      def subscriber = TestSubscriber.createSubscriber(defaultSubscriber, channels)
 
       assertNotNull subscriber
       assertEquals subscriber.channels.size(), channels.size()
@@ -78,7 +80,7 @@ class NotificationServiceTests extends GroovyTestCase {
             new Channel(channelImpl: "pt.whiteroad.plugins.notifications.custom.CustomMailNotification", destination: "nuno.lopes.luis@gmail.com")
     ]
 
-    def subscriber = Subscriber.findByAlias(defaultSubscriber)
+    def subscriber = TestSubscriber.findByAlias(defaultSubscriber)
     channels.each{
       subscriber.addToChannels(it)
     }
@@ -101,22 +103,22 @@ class NotificationServiceTests extends GroovyTestCase {
   void testUnsubscribeTopic(){
     createSubscription()
 
-    def oldNum = Subscription.count()
+    def oldNum = TestSubscription.count()
 
-    def subscriber = Subscriber.findByAlias(defaultSubscriber)
+    def subscriber = TestSubscriber.findByAlias(defaultSubscriber)
     def topic = NotificationTopic.findByTopic(defaultTopic)
     notificationService.unsubscribeTopic(subscriber, topic)
 
-    assertEquals(oldNum-1, Subscription.count())
+    assertEquals(oldNum-1, TestSubscription.count())
   }
 
   /**
    * Subscribes a topic using all the available communication channels.
    * */
   private void createSubscription(){
-    def subscriber = Subscriber.findByAlias(defaultSubscriber)
+    def subscriber = TestSubscriber.findByAlias(defaultSubscriber)
     def notificationTopic = NotificationTopic.findByTopic(defaultTopic)
-    if(!Subscription.findBySubscriberAndTopic(subscriber, notificationTopic)){
+    if(!TestSubscription.findBySubscriberAndTopic(subscriber, notificationTopic)){
       def oldNumSubscriptions = subscriber?.subscriptions?.count() ?: 0
       def subscription = notificationService.subscribeTopic(subscriber, defaultTopic, subscriber.channels)
       subscriber.refresh()
@@ -124,7 +126,7 @@ class NotificationServiceTests extends GroovyTestCase {
       assertNotNull(subscription)
       assertEquals subscription.channels.size(), subscriber.channels.size()
       //Refresh the subscriber and count the subscriptions
-      subscriber = Subscriber.get(subscriber.id)
+      subscriber = TestSubscriber.get(subscriber.id)
       assertEquals subscriber?.subscriptions?.size(), oldNumSubscriptions + 1
 
     }

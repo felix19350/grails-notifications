@@ -1,4 +1,5 @@
 import pt.whiteroad.plugins.notifications.NotificationTopic
+import pt.whiteroad.plugins.notifications.config.NotificationUtils
 
 class NotificationsGrailsPlugin {
   // the plugin version
@@ -6,11 +7,14 @@ class NotificationsGrailsPlugin {
   // the version or versions of Grails the plugin is designed for
   def grailsVersion = "1.3.7 > *"
   // the other plugins this plugin depends on
-  def dependsOn = [executor: "0.2 > *", quartz: "0.4.1 > *", mail: "1.0 > *"]
+  def dependsOn = [hibernate: "1.3.7 > *" ,executor: "0.2 > *", quartz: "0.4.1 > *", mail: "1.0 > *"]
+  def loadAfter = ['hibernate']
 
   // resources that are excluded from plugin packaging
   def pluginExcludes = [
-          "grails-app/views/error.gsp"
+          "grails-app/views/error.gsp",
+          "grails-app/domain/test/**"
+
   ]
 
   def author = "Bruno Félix, Nuno Luís"
@@ -22,7 +26,7 @@ These can be delivered through several channels such as e-mail (and in future ve
 '''
 
   // URL to the plugin's documentation
-  def documentation = "http://grails.org/plugin/pubsub-notifications"
+  def documentation = "http://grails.org/plugin/notifications"
 
   /*def doWithSpring = {
     //TODO: Hook into grails runtime config
@@ -33,13 +37,15 @@ These can be delivered through several channels such as e-mail (and in future ve
 
     //Bootstrap any number of Notification topics required by the application
     String[] topics = config?.topics ? (config.topics as String).split(",") : []
-
-    topics.each{
-      NotificationTopic.withNewSession {
+    NotificationTopic.withNewSession{
+      topics.each{
         new NotificationTopic(topic: it).save(flush: true)
       }
     }
+  }
 
+  def onConfigChange = { event ->
+    NotificationUtils.resetConfig()
   }
 
   /*def onChange = {event ->
