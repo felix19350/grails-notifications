@@ -5,7 +5,7 @@ class NotificationTopic {
     String topic
 
     static constraints = {
-      topic(blank: false, size: 1 .. 256, unique: true)
+      topic(blank: false, size: 1 .. 256)
     }
 
   public String toString(){

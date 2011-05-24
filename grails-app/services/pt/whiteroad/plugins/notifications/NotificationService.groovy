@@ -54,29 +54,24 @@ class NotificationService {
   }
 
   /**
-   * Immediately sends notifications to the subscribers, overlooking the scheduler.
+   * Convenience method that allows a user to subscribe a topic through all
+   * the available channels
+   * @param subscriber - An instance of the subscriber class
+   * @param topic - A string with the topic of a notification.
+   * @return subscription - The susbcription that was created.
    * */
-  def sendNow(Notification notification){
-    def Subscription = loadSubscription()
-
-    def subscriptions = Subscription.findAllByTopic(notification.topic)
-    subscriptions.each{ subscription ->
-      subscription.channels.each{ channel ->
-        try{
-          println "Creating instance of ${channel.channelImpl}"
-          def loader = this.class.classLoader
-          def context = Class.forName(channel.channelImpl, true, loader)
-          IChannelSender sender = (IChannelSender)context.newInstance()
-          sender.send(notification, channel.destination)
-        }catch(Exception e){
-          e.printStackTrace()
-        }
-      }
-    }
+  def subscribeTopic(subscriber, topic){
+    def channels = subscriber.channels
+    return subscribeTopic(subscriber, topic, channels)
   }
 
   /**
    * Allows the subscription of a topic.
+   * @param subscriber - An instance of the subscriber class
+   * @param topic - A string with the topic of a notification.
+   * @param channels - The channels the user wishes to use to receive
+   * the notifications. These channels should be registered with the
+   * subscriber.
    * @return subscription - The susbcription that was created.
    * */
   def subscribeTopic(subscriber, topic, channels){
@@ -122,25 +117,44 @@ class NotificationService {
   /**
    * Unsubscribes a topic.
    * @param subscriber - A Subscriber
-   * @param topic - a NotificationTopic
+   * @param topic - the topic of a notificationTopic
    * */
-  def unsubscribeTopic(subscriber, NotificationTopic topic){
+  def unsubscribeTopic(subscriber, topic){
     def Subscription = loadSubscription()
 
     Subscription.withTransaction{ status ->
       //Remove subscription
       try{
-        println "Subscriber: ${subscriber?.alias} - Topic: ${topic?.topic}"
-        Subscription.list().each{
-          println "${it.subscriber.alias} - ${it.topic.topic}"
-        }
-        def subscription = Subscription.findBySubscriberAndTopic(subscriber, topic)
+        def notificationTopic = NotificationTopic.findByTopic(topic)
+        def subscription = Subscription.findBySubscriberAndTopic(subscriber, notificationTopic)
 
         subscriber.removeFromSubscriptions(subscription)
         subscription.delete()
       }catch(Exception e){
         e.printStackTrace()
         status.setRollbackOnly()
+      }
+    }
+  }
+
+  /**
+   * Immediately sends notifications to the subscribers, overlooking the scheduler.
+   * */
+  private def sendNow(Notification notification){
+    def Subscription = loadSubscription()
+
+    def subscriptions = Subscription.findAllByTopic(notification.topic)
+    subscriptions.each{ subscription ->
+      subscription.channels.each{ channel ->
+        try{
+          println "Creating instance of ${channel.channelImpl}"
+          def loader = this.class.classLoader
+          def context = Class.forName(channel.channelImpl, true, loader)
+          IChannelSender sender = (IChannelSender)context.newInstance()
+          sender.send(notification, channel.destination)
+        }catch(Exception e){
+          e.printStackTrace()
+        }
       }
     }
   }
