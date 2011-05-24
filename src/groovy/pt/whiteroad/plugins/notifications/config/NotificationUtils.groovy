@@ -24,7 +24,7 @@ class NotificationUtils {
    * Reloads the configuration
    * */
   public static void resetConfig(){
-    println "RELOADING APP CONFIG"
+    //println "RELOADING APP CONFIG"
     config = loadConfig()
     setAppConfig(config)
   }
@@ -48,9 +48,9 @@ class NotificationUtils {
       mergedConfig.putAll(defaultConfig.merge(currentConfig))
     }
 
-    println "PLUGIN DEFAULT CONFIG: ${defaultConfig.dump()}"
-    println "APP CONFIG: ${currentConfig.dump()}"
-    println "MERGED CONFIG ${mergedConfig.dump()}"
+    //println "PLUGIN DEFAULT CONFIG: ${defaultConfig.dump()}"
+    //println "APP CONFIG: ${currentConfig.dump()}"
+    //println "MERGED CONFIG ${mergedConfig.dump()}"
 
     return mergedConfig
   }
