@@ -6,21 +6,25 @@
 The grails notifications plugin enables the management of simple text notifications to the users.
 These can be delivered through several channels such as e-mail (and in future versions, Apple Push Notifications, and Android C2DM, etc).
 </description>
-  <documentation>http://grails.org/plugin/pubsub-notifications</documentation>
+  <documentation>http://grails.org/plugin/notifications</documentation>
   <resources>
     <resource>BuildConfig</resource>
     <resource>Config</resource>
     <resource>DataSource</resource>
+    <resource>DefaultConfig</resource>
     <resource>UrlMappings</resource>
     <resource>pt.whiteroad.plugins.notifications.Channel</resource>
     <resource>pt.whiteroad.plugins.notifications.ChannelType</resource>
     <resource>pt.whiteroad.plugins.notifications.Notification</resource>
     <resource>pt.whiteroad.plugins.notifications.NotificationTopic</resource>
+    <resource>test.TestSubscriber</resource>
+    <resource>test.TestSubscription</resource>
     <resource>pt.whiteroad.plugins.notifications.ScheduleNotificationJob</resource>
     <resource>pt.whiteroad.plugins.notifications.InternalMsgService</resource>
     <resource>pt.whiteroad.plugins.notifications.NotificationService</resource>
   </resources>
   <dependencies>
+    <plugin name='hibernate' version='1.3.7 &gt; *' />
     <plugin name='executor' version='0.2 &gt; *' />
     <plugin name='quartz' version='0.4.1 &gt; *' />
     <plugin name='mail' version='1.0 &gt; *' />

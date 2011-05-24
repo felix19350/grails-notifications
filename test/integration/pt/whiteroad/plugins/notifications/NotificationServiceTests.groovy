@@ -16,9 +16,12 @@ class NotificationServiceTests extends GroovyTestCase {
     super.setUp()
     quartzScheduler.start()
 
-    if(!NotificationTopic.findByTopic(defaultTopic)){
-      new NotificationTopic(topic: defaultTopic).save(flush: true)
+    NotificationTopic.withNewSession{session ->
+      if(!NotificationTopic.findByTopic(defaultTopic)){
+        new NotificationTopic(topic: defaultTopic).save(flush: true)
+      }
     }
+
 
     if(!TestSubscriber.findByAlias(defaultSubscriber)){
       def channels = [
@@ -121,7 +124,8 @@ class NotificationServiceTests extends GroovyTestCase {
     if(!TestSubscription.findBySubscriberAndTopic(subscriber, notificationTopic)){
       def oldNumSubscriptions = subscriber?.subscriptions?.count() ?: 0
       def subscription = notificationService.subscribeTopic(subscriber, defaultTopic, subscriber.channels)
-      subscriber.refresh()
+      //Force a new instance
+      subscriber = TestSubscriber.findByAlias(defaultSubscriber)
 
       assertNotNull(subscription)
       assertEquals subscription.channels.size(), subscriber.channels.size()

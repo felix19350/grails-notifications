@@ -33,15 +33,7 @@ These can be delivered through several channels such as e-mail (and in future ve
   }*/
 
   def doWithApplicationContext = { applicationContext ->
-    def config = application.config.grails.plugins.notifications
-
-    //Bootstrap any number of Notification topics required by the application
-    String[] topics = config?.topics ? (config.topics as String).split(",") : []
-    NotificationTopic.withNewSession{
-      topics.each{
-        new NotificationTopic(topic: it).save(flush: true)
-      }
-    }
+    //TODO: Hook this in application context
   }
 
   def onConfigChange = { event ->
