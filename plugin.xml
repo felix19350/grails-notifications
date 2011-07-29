@@ -17,8 +17,6 @@ These can be delivered through several channels such as e-mail (and in future ve
     <resource>pt.whiteroad.plugins.notifications.ChannelType</resource>
     <resource>pt.whiteroad.plugins.notifications.Notification</resource>
     <resource>pt.whiteroad.plugins.notifications.NotificationTopic</resource>
-    <resource>pt.whiteroad.plugins.notifications.Subscriber</resource>
-    <resource>pt.whiteroad.plugins.notifications.Subscription</resource>
     <resource>test.TestSubscriber</resource>
     <resource>test.TestSubscription</resource>
     <resource>pt.whiteroad.plugins.notifications.CleanNotificationsJob</resource>

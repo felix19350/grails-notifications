@@ -6,7 +6,7 @@ class Notification {
   String message
   Date creationDate
   Date scheduledDate
-  boolean processed = false
+  Boolean processed = false
 
   static mapping = {
     message type: 'text'
@@ -15,7 +15,7 @@ class Notification {
   static constraints = {
     topic(nullable: false)
     message(blank: false, size: 1 .. 768)
-    scheduledDate(nullable: true, validator: {val, obj -> if(val && !obj.processed){val >  new Date()}})
+    scheduledDate(nullable: true, validator: {val, obj -> if(val && !obj?.processed){val > new Date()}})
     creationDate(nullable: true)
     processed(nullable: false)
   }

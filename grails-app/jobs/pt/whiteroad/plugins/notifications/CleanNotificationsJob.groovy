@@ -13,6 +13,7 @@ class CleanNotificationsJob {
   //def group = "NotificationJobs"
 
   def execute(context){
+    println "Executing CleanNotificationJob"
     def notifications = notificationService.collectDelayedNotifications()
     notifications.each{
       notificationService.sendNotification(it)

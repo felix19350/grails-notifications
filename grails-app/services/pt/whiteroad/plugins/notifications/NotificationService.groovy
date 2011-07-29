@@ -3,10 +3,10 @@ package pt.whiteroad.plugins.notifications
 import pt.whiteroad.plugins.notifications.config.NotificationUtils
 
 /**
- * The notification service is the main entry point to the provided functionality. All the relevant methods
- * are exposed here. Note that simple topic management operations can be handled directly by the NotificationTopic object and GORM
- * so for now these will not be contemplated in the service.
- * */
+* The notification service is the main entry point to the provided functionality. All the relevant methods
+* are exposed here. Note that simple topic management operations can be handled directly by the NotificationTopic object and GORM
+* so for now these will not be contemplated in the service.
+* */
 class NotificationService {
 
   def static int interval = 1000
@@ -17,9 +17,9 @@ class NotificationService {
   def grailsApplication
 
   /**
-   * This is syntatic sugar. It creates a notification based on the arguments, and then calls
-   * the sendNotification method. Note that if the topic does not exist it is created.
-   * */
+* This is syntatic sugar. It creates a notification based on the arguments, and then calls
+* the sendNotification method. Note that if the topic does not exist it is created.
+* */
   def sendNotification(String topic, String message, Date scheduledDate){
     Notification.withTransaction{status ->
       try{
@@ -41,9 +41,9 @@ class NotificationService {
 
 
   /**
-   * Sends notifications to all subscribers - scheduling them if needed. If the notification is scheduled
-   * to begin in less than a second from the current time then it is ignored and it is immediately run.
-   * */
+* Sends notifications to all subscribers - scheduling them if needed. If the notification is scheduled
+* to begin in less than a second from the current time then it is ignored and it is immediately run.
+* */
   def sendNotification(Notification notification){
     if(notification.scheduledDate && notification.scheduledDate.time > (System.currentTimeMillis() + interval)){
       //Schedule event
@@ -57,26 +57,26 @@ class NotificationService {
   }
 
   /**
-   * Convenience method that allows a user to subscribe a topic through all
-   * the available channels
-   * @param subscriber - An instance of the subscriber class
-   * @param topic - A string with the topic of a notification.
-   * @return subscription - The susbcription that was created.
-   * */
+* Convenience method that allows a user to subscribe a topic through all
+* the available channels
+* @param subscriber - An instance of the subscriber class
+* @param topic - A string with the topic of a notification.
+* @return subscription - The susbcription that was created.
+* */
   def subscribeTopic(subscriber, topic){
     def channels = subscriber.channels
     return subscribeTopic(subscriber, topic, channels)
   }
 
   /**
-   * Allows the subscription of a topic.
-   * @param subscriber - An instance of the subscriber class
-   * @param topic - A string with the topic of a notification.
-   * @param channels - The channels the user wishes to use to receive
-   * the notifications. These channels should be registered with the
-   * subscriber.
-   * @return subscription - The susbcription that was created.
-   * */
+* Allows the subscription of a topic.
+* @param subscriber - An instance of the subscriber class
+* @param topic - A string with the topic of a notification.
+* @param channels - The channels the user wishes to use to receive
+* the notifications. These channels should be registered with the
+* subscriber.
+* @return subscription - The susbcription that was created.
+* */
   def subscribeTopic(subscriber, topic, channels){
     def Subscription = loadSubscription()
 
@@ -106,10 +106,10 @@ class NotificationService {
   }
 
   /**
-   * Syntatic sugar method. Unsubscribes a topic
-   * @param subscriber - String, The subscriber's alias
-   * @param topic - String, the Notification's topic
-   * */
+* Syntatic sugar method. Unsubscribes a topic
+* @param subscriber - String, The subscriber's alias
+* @param topic - String, the Notification's topic
+* */
   def unsubscribeTopic(String subscriber, String topic){
     def notificationTopic = NotificationTopic.findByTopic(topic)
     def Subscriber = loadSubscriber()
@@ -118,10 +118,10 @@ class NotificationService {
   }
 
   /**
-   * Unsubscribes a topic.
-   * @param subscriber - A Subscriber
-   * @param topic - the topic of a notificationTopic
-   * */
+* Unsubscribes a topic.
+* @param subscriber - A Subscriber
+* @param topic - the topic of a notificationTopic
+* */
   def unsubscribeTopic(subscriber, topic){
     def Subscription = loadSubscription()
 
@@ -141,8 +141,8 @@ class NotificationService {
   }
 
   /**
-   * Immediately sends notifications to the subscribers, overlooking the scheduler.
-   * */
+* Immediately sends notifications to the subscribers, overlooking the scheduler.
+* */
   def sendNow(Notification notification){
     def subscriptionCls = loadSubscription()
     try{
@@ -173,9 +173,9 @@ class NotificationService {
   }
 
   /**
-   * Collects any delayed notifications, and returns them in a list.
-   * @return List<Notification> - The list with all delayed notifications.
-   * */
+* Collects any delayed notifications, and returns them in a list.
+* @return List<Notification> - The list with all delayed notifications.
+* */
   def collectDelayedNotifications(){
     def now = new Date()
     def notifications = Notification.withCriteria{

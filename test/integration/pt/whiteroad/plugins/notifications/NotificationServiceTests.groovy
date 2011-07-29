@@ -47,7 +47,11 @@ class NotificationServiceTests extends GroovyTestCase {
     def oldCount = Notification.count()
     def topic = NotificationTopic.findByTopic(defaultTopic)
     Notification notification = new Notification(message: "PUB/SUB notification", topic: topic)
-    notification.save(flush: true)
+    if(!notification.save(flush: true)){
+      notification.errors.each{
+        System.err.println it
+      }
+    }
     assertEquals oldCount+1 , Notification.count()
     notificationService.sendNotification(notification)
   }
