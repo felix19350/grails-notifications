@@ -145,27 +145,30 @@ class NotificationService {
    * */
   def sendNow(Notification notification){
     def subscriptionCls = loadSubscription()
-
-    def subscriptions = subscriptionCls.findAllByTopic(notification.topic)
-    subscriptions.each{ subscription ->
-      subscription.channels.each{ channel ->
-        try{
-          println "Creating instance of ${channel.channelImpl}"
-          def loader = this.class.classLoader
-          def context = Class.forName(channel.channelImpl, true, loader)
-          IChannelSender sender = (IChannelSender)context.newInstance()
-          sender.send(notification, channel.destination)
-        }catch(Exception e){
-          e.printStackTrace()
+    try{
+      def subscriptions = subscriptionCls.findAllByTopic(notification.topic)
+      subscriptions.each{ subscription ->
+        subscription.channels.each{ channel ->
+          try{
+            println "Creating instance of ${channel.channelImpl}"
+            def loader = this.class.classLoader
+            def context = Class.forName(channel.channelImpl, true, loader)
+            IChannelSender sender = (IChannelSender)context.newInstance()
+            sender.send(notification, channel.destination)
+          }catch(Exception e){
+            e.printStackTrace()
+          }
         }
       }
-    }
 
-    notification.processed = true
-    if(!notification.save(flush: true)){
-      notification.errors.each{
-        System.err.println it
+      notification.processed = true
+      if(!notification.save(flush: true)){
+        notification.errors.each{
+          System.err.println it
+        }
       }
+    }catch(Exception e){
+      e.printStackTrace()
     }
   }
 
@@ -175,7 +178,7 @@ class NotificationService {
    * */
   def collectDelayedNotifications(){
     def now = new Date()
-    def notifications = Notification.withCriteria{      
+    def notifications = Notification.withCriteria{
       and{
         eq('processed', false)
         or{
