@@ -19,6 +19,7 @@ These can be delivered through several channels such as e-mail (and in future ve
     <resource>pt.whiteroad.plugins.notifications.NotificationTopic</resource>
     <resource>test.TestSubscriber</resource>
     <resource>test.TestSubscription</resource>
+    <resource>pt.whiteroad.plugins.notifications.CleanNotificationsJob</resource>
     <resource>pt.whiteroad.plugins.notifications.ScheduleNotificationJob</resource>
     <resource>pt.whiteroad.plugins.notifications.InternalMsgService</resource>
     <resource>pt.whiteroad.plugins.notifications.NotificationService</resource>
