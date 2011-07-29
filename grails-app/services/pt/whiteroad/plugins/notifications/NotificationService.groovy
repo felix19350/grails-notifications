@@ -26,6 +26,9 @@ class NotificationService {
         def notificationTopic = NotificationTopic.findByTopic(topic) ?: new NotificationTopic(topic: topic).save(flush:true)
         def notification = new Notification(topic: notificationTopic, message: message, scheduledDate: scheduledDate)
         if(!notification.save()){
+          notification.errors.each{
+            println it
+          }
           throw new RuntimeException()
         }
         sendNotification(notification)
@@ -140,10 +143,10 @@ class NotificationService {
   /**
    * Immediately sends notifications to the subscribers, overlooking the scheduler.
    * */
-  private def sendNow(Notification notification){
-    def Subscription = loadSubscription()
+  def sendNow(Notification notification){
+    def subscriptionCls = loadSubscription()
 
-    def subscriptions = Subscription.findAllByTopic(notification.topic)
+    def subscriptions = subscriptionCls.findAllByTopic(notification.topic)
     subscriptions.each{ subscription ->
       subscription.channels.each{ channel ->
         try{
@@ -157,6 +160,32 @@ class NotificationService {
         }
       }
     }
+
+    notification.processed = true
+    if(!notification.save(flush: true)){
+      notification.errors.each{
+        System.err.println it
+      }
+    }
+  }
+
+  /**
+   * Collects any delayed notifications, and returns them in a list.
+   * @return List<Notification> - The list with all delayed notifications.
+   * */
+  def collectDelayedNotifications(){
+    def now = new Date()
+    def notifications = Notification.withCriteria{      
+      and{
+        eq('processed', false)
+        or{
+          isNull('scheduledDate')
+          lt('scheduledDate', now)
+        }
+      }
+
+    }
+    return notifications
   }
 
   private Class loadSubscriber(){

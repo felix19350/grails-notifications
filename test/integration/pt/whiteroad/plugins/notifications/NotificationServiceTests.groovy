@@ -36,7 +36,7 @@ class NotificationServiceTests extends GroovyTestCase {
 
   protected void tearDown() {
     //Sleep should be here since the sendNotification launches a new thread and the application may begin
-    //its shutdown process in the meantime
+    //its shutdown process in the meantime :(
     sleep 15000
     super.tearDown()
   }
@@ -60,8 +60,13 @@ class NotificationServiceTests extends GroovyTestCase {
     def date = new Date(System.currentTimeMillis() + 10000);
 
     println "Scheduled to: ${date}"
+    Notification notification = new Notification(message: "Scheduled PUB/SUB notification", topic: topic, scheduledDate: date)
+    if(!notification.save(flush: true)){
+      notification.errors.each{
+        System.err.println it
+      }
+    }
 
-    Notification notification = new Notification(message: "Scheduled PUB/SUB notification", topic: topic, scheduledDate: date).save(flush: true)
     assertEquals oldCount+1 , Notification.count()
     notificationService.sendNotification(notification)
   }
@@ -111,6 +116,27 @@ class NotificationServiceTests extends GroovyTestCase {
     assertEquals(oldNum-1, TestSubscription.count())
   }
 
+  void testCollectDelayedNotifications(){
+    createSubscription()
+    def topic = NotificationTopic.findByTopic(defaultTopic)
+    def initSize = notificationService.collectDelayedNotifications().size()
+    def max = 5
+    for(i in 1..max){
+      def oldCount = Notification.count()
+      Notification notification = new Notification(message: "Delayed notification ${i}", topic: topic)
+      if(i % 2 == 0){
+        def now = new Date(System.currentTimeMillis() + 1000);
+        notification.scheduledDate = now;
+      }
+
+      notification.save(flush: true)
+      sleep 5000
+      assertEquals oldCount+1 , Notification.count()
+    }
+    def delayed = notificationService.collectDelayedNotifications()
+    assertEquals(initSize + max, delayed.size())
+  }
+
   /**
    * Subscribes a topic using all the available communication channels.
    * */
@@ -128,7 +154,6 @@ class NotificationServiceTests extends GroovyTestCase {
       //Refresh the subscriber and count the subscriptions
       subscriber = TestSubscriber.get(subscriber.id)
       assertEquals subscriber?.subscriptions?.size(), oldNumSubscriptions + 1
-
     }
 
   }

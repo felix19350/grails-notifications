@@ -6,9 +6,7 @@ class ScheduleNotificationJob {
   def notificationService
   def quartzScheduler
 
-  static triggers = {
-    //No triggers - this job should only be called programaticaly
-  }
+  //def group = "NotificationJobs"
 
   def execute(context){
     Notification notification = Notification.get(context.mergedJobDataMap.get('notificationId') as long)
