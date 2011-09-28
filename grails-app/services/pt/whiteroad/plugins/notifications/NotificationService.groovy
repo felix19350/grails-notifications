@@ -19,8 +19,11 @@ class NotificationService {
   /**
    * This is syntatic sugar. It creates a notification based on the arguments, and then calls
    * the sendNotification method. Note that if the topic does not exist it is created.
+   * @param topic - A String that represents the topic
+   * @param message - A String that has the payload of the notification
+   * @param scheduledDate - The date at which the notification should be sent. If it is null it is sent immediatly.
    * */
-  def sendNotification(String topic, String message, Date scheduledDate){
+  def sendNotification(String topic, String message, Date scheduledDate = null){
     Notification.withTransaction{status ->
       try{
         def notificationTopic = NotificationTopic.findByTopic(topic) ?: new NotificationTopic(topic: topic).save(flush:true)
@@ -43,6 +46,7 @@ class NotificationService {
   /**
    * Sends notifications to all subscribers - scheduling them if needed. If the notification is scheduled
    * to begin in less than a second from the current time then it is ignored and it is immediately run.
+   * @param notification - An instance of a Notification that is to be sent.
    * */
   def sendNotification(Notification notification){
     if(notification.scheduledDate && notification.scheduledDate.time > (System.currentTimeMillis() + interval)){
