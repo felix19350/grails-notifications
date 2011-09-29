@@ -54,9 +54,9 @@ class NotificationService {
       ScheduleNotificationJob.schedule(notification.scheduledDate, ['notificationId': notification.id])
     }else{
       //Send now!
-      runAsync {
+      //runAsync {
         sendNow(notification)
-      }
+      //}
     }
   }
 
@@ -65,11 +65,12 @@ class NotificationService {
    * the available channels
    * @param subscriber - An instance of the subscriber class
    * @param topic - A string with the topic of a notification.
+   * @param disabled - Marks the subscription as disabled
    * @return subscription - The susbcription that was created.
    * */
-  def subscribeTopic(subscriber, topic){
+  def subscribeTopic(subscriber, topic, boolean disabled = false){
     def channels = subscriber.channels
-    return subscribeTopic(subscriber, topic, channels)
+    return subscribeTopic(subscriber, topic, channels, disabled)
   }
 
   /**
@@ -79,16 +80,18 @@ class NotificationService {
    * @param channels - The channels the user wishes to use to receive
    * the notifications. These channels should be registered with the
    * subscriber.
+   * @param disabled - Marks the subscription as disabled
    * @return subscription - The susbcription that was created.
    * */
-  def subscribeTopic(subscriber, topic, channels){
+  def subscribeTopic(subscriber, topic, channels, boolean disabled = false){
     def Subscription = loadSubscription()
-
     Subscription.withTransaction{ status ->
       try{
         def notificationTopic = NotificationTopic.findByTopic(topic)
         def subscription = Subscription.newInstance()
         subscription.topic = notificationTopic
+		subscription.disabled = disabled
+
         channels.each{ channel ->
           subscription.addToChannels(channel)
         }
