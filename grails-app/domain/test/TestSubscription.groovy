@@ -9,9 +9,11 @@ class TestSubscription {
     static hasMany = [channels: Channel]
 
     NotificationTopic topic
+    Boolean disabled = false
 
     static constraints = {
       topic(nullable: false)
+      disabled(nullable: false)
       channels(minSize: 1, validator: {val, obj ->
         def allBelongToSubscriber = true
         val.each{

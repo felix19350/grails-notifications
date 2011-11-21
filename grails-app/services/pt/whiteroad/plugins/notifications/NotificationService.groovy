@@ -53,10 +53,13 @@ class NotificationService {
       //Schedule event
       ScheduleNotificationJob.schedule(notification.scheduledDate, ['notificationId': notification.id])
     }else{
-      //Send now!
-      //runAsync {
+      if(grailsApplication.config.grails.plugins.notifications.multiThread){
+        runAsync{
+          sendNow(notification)
+        }
+      }else{
         sendNow(notification)
-      //}
+      }
     }
   }
 

@@ -1,14 +1,8 @@
 // configuration for plugin testing - will not be included in the plugin zip
 grails {
+  grails.serverURL = "http://localhost:8080/${appName}"
   mail {
-    host = "smtp.gmail.com"
-    port = 465
-    username = "whiteroadtest@gmail.com"
-    password = "euviumsapo"
-    props = ["mail.smtp.auth":"true",
-            "mail.smtp.socketFactory.port":"465",
-            "mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",
-            "mail.smtp.socketFactory.fallback":"false"]
+    port = com.icegreen.greenmail.util.ServerSetupTest.SMTP.port
   }
 }
 
@@ -43,6 +37,9 @@ grails{
       domainClassPackage= 'test'
       subscriberDomainClass = 'test.TestSubscriber'
       subscriptionDomainClass = 'test.TestSubscription'
+      multiThread = false
     }
   }
 }
+grails.views.default.codec="none" // none, html, base64
+grails.views.gsp.encoding="UTF-8"

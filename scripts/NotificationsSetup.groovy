@@ -63,6 +63,8 @@ private void updateConfig() {
       it.writeLine "grails.plugins.notifications.subscriberDomainClass = '${packageName}.$subscriberDomainClass'"
       it.writeLine "grails.plugins.notifications.subscriptionDomainClass = '${packageName}.$subscriptionDomainClass'"
       it.writeLine '\n// Notifications plugin - END GENERATED CONFIG'
+      it.writeLine 'Multi-threaded notifications are disabled by default. To change this, please add the following line to the Config.groovy file:'
+      it.writeLine 'grails.plugins.notifications.multiThread = false'
     }
   }
 }

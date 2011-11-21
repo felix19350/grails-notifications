@@ -3,6 +3,9 @@ package pt.whiteroad.plugins.notifications
 import test.TestSubscriber
 import test.TestSubscription
 
+/**
+ * Please not that the tests assume that we are not using the multi-threaded version.
+ * */
 class NotificationServiceTests extends GroovyTestCase {
 
   def transactional = true
@@ -35,9 +38,6 @@ class NotificationServiceTests extends GroovyTestCase {
   }
 
   protected void tearDown() {
-    //Sleep should be here since the sendNotification launches a new thread and the application may begin
-    //its shutdown process in the meantime :(
-    sleep 15000
     super.tearDown()
   }
 
@@ -123,22 +123,34 @@ class NotificationServiceTests extends GroovyTestCase {
   void testCollectDelayedNotifications(){
     createSubscription()
     def topic = NotificationTopic.findByTopic(defaultTopic)
-    def initSize = notificationService.collectDelayedNotifications().size()
+
+    def oldCount = Notification.count()
     def max = 5
+    def numDelayed = 0
     for(i in 1..max){
-      def oldCount = Notification.count()
       Notification notification = new Notification(message: "Delayed notification ${i}", topic: topic)
+
       if(i % 2 == 0){
+        //Even notifications are marked as delayed
         def now = new Date(System.currentTimeMillis() + 1000);
         notification.scheduledDate = now;
+        numDelayed++
+      }else{
+        //Odd notifications simply don't have a set date, they are to be sent "now"
+        numDelayed++
       }
 
-      notification.save(flush: true)
-      sleep 5000
-      assertEquals oldCount+1 , Notification.count()
+      if(!notification.save(flush: true)){
+        notification.errors.each{
+          println it
+        }
+      }
     }
+
+    assertEquals oldCount+max , Notification.count()
+    sleep(5000)
     def delayed = notificationService.collectDelayedNotifications()
-    assertEquals(initSize + max, delayed.size())
+    assertEquals(numDelayed, delayed.size())
   }
 
   /**
@@ -152,12 +164,12 @@ class NotificationServiceTests extends GroovyTestCase {
       def subscription = notificationService.subscribeTopic(subscriber, defaultTopic, subscriber.channels)
       //Force a new instance
       subscriber = TestSubscriber.findByAlias(defaultSubscriber)
-
+      assertNotNull(subscriber)
       assertNotNull(subscription)
-      assertEquals subscription.channels.size(), subscriber.channels.size()
+      assertEquals(subscription.channels.size(), subscriber.channels.size())
       //Refresh the subscriber and count the subscriptions
       subscriber = TestSubscriber.get(subscriber.id)
-      assertEquals subscriber?.subscriptions?.size(), oldNumSubscriptions + 1
+      assertEquals(subscriber?.subscriptions?.size(), oldNumSubscriptions + 1)
     }
 
   }
